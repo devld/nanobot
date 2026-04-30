@@ -700,10 +700,14 @@ class DiscordChannel(BaseChannel):
             if message.reference and message.reference.message_id
             else None
         )
+        sender_name = getattr(message.author, "display_name", None) or getattr(
+            message.author, "name", None
+        )
         return {
             "message_id": str(message.id),
             "guild_id": str(message.guild.id) if message.guild else None,
             "reply_to": reply_to,
+            "sender_name": str(sender_name) if sender_name else None,
         }
 
     def _should_respond_in_group(self, message: discord.Message, content: str) -> bool:

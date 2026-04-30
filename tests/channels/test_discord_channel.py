@@ -198,7 +198,12 @@ def _make_message(
         else None
     )
     return SimpleNamespace(
-        author=SimpleNamespace(id=author_id, bot=author_bot),
+        author=SimpleNamespace(
+            id=author_id,
+            bot=author_bot,
+            display_name=f"display-{author_id}",
+            name=f"user-{author_id}",
+        ),
         channel=_FakeChannel(channel_id, parent_channel_id),
         content=content,
         guild=guild,
@@ -357,7 +362,12 @@ async def test_on_message_accepts_allowlisted_dm() -> None:
 
     assert len(handled) == 1
     assert handled[0]["chat_id"] == "456"
-    assert handled[0]["metadata"] == {"message_id": "789", "guild_id": None, "reply_to": None}
+    assert handled[0]["metadata"] == {
+        "message_id": "789",
+        "guild_id": None,
+        "reply_to": None,
+        "sender_name": "display-123",
+    }
 
 
 @pytest.mark.asyncio

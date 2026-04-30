@@ -574,6 +574,8 @@ class AgentLoop:
                     pending_msg.channel,
                     self._runtime_chat_id(pending_msg),
                     self.context.timezone,
+                    sender_id=pending_msg.sender_id,
+                    sender_name=str(pending_msg.metadata.get("sender_name") or "") or None,
                 )
                 if isinstance(user_content, str):
                     merged: str | list[dict[str, Any]] = f"{runtime_ctx}\n\n{user_content}"
@@ -1008,6 +1010,8 @@ class AgentLoop:
                 media=msg.media if msg.media else None,
                 channel=msg.channel,
                 chat_id=self._runtime_chat_id(msg),
+                sender_id=msg.sender_id,
+                sender_name=str(msg.metadata.get("sender_name") or "") or None,
             )
 
         async def _bus_progress(

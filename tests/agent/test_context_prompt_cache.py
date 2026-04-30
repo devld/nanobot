@@ -87,6 +87,27 @@ def test_runtime_context_is_separate_untrusted_user_message(tmp_path) -> None:
     assert "Return exactly: OK" in user_content
 
 
+def test_runtime_context_includes_sender_identity_when_provided(tmp_path) -> None:
+    workspace = _make_workspace(tmp_path)
+    builder = ContextBuilder(workspace)
+
+    messages = builder.build_messages(
+        history=[],
+        current_message="hello",
+        channel="discord",
+        chat_id="1479127443729289365",
+        sender_id="123456789012345678",
+        sender_name="Alice",
+    )
+
+    user_content = messages[-1]["content"]
+    assert isinstance(user_content, str)
+    assert "Channel: discord" in user_content
+    assert "Chat ID: 1479127443729289365" in user_content
+    assert "Sender ID: 123456789012345678" in user_content
+    assert "Sender Name: Alice" in user_content
+
+
 def test_unprocessed_history_injected_into_system_prompt(tmp_path) -> None:
     """Entries in history.jsonl not yet consumed by Dream appear with timestamps."""
     workspace = _make_workspace(tmp_path)
