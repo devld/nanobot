@@ -1,11 +1,14 @@
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 
-# Install Node.js 20 for the WhatsApp bridge
+# Install Node.js 24 LTS for the WhatsApp bridge via the NodeSource apt repository
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl ca-certificates gnupg git bubblewrap openssh-client && \
-    mkdir -p /etc/apt/keyrings && \
-    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
-    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" > /etc/apt/sources.list.d/nodesource.list && \
+    mkdir -p /usr/share/keyrings && \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /usr/share/keyrings/nodesource.gpg && \
+    chmod 644 /usr/share/keyrings/nodesource.gpg && \
+    NODE_MAJOR=24 && \
+    ARCH="$(dpkg --print-architecture)" && \
+    printf 'Types: deb\nURIs: https://deb.nodesource.com/node_%s.x\nSuites: nodistro\nComponents: main\nArchitectures: %s\nSigned-By: /usr/share/keyrings/nodesource.gpg\n' "$NODE_MAJOR" "$ARCH" > /etc/apt/sources.list.d/nodesource.sources && \
     apt-get update && \
     apt-get install -y --no-install-recommends nodejs && \
     apt-get purge -y gnupg && \
