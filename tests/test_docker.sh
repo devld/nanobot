@@ -8,6 +8,11 @@ echo "=== Building Docker image ==="
 docker build -t "$IMAGE_NAME" .
 
 echo ""
+echo "=== Starting xpra display ==="
+docker run --rm --user nanobot --entrypoint /bin/sh "$IMAGE_NAME" -c \
+    'start-xpra && test -S /tmp/.X11-unix/X100 && xpra list | grep -Fq "LIVE session at :100"'
+
+echo ""
 echo "=== Running 'nanobot onboard' ==="
 docker run --name nanobot-test-run "$IMAGE_NAME" onboard
 
@@ -35,9 +40,9 @@ check "nanobot Status"
 check "Config:"
 check "Workspace:"
 check "Model:"
-check "OpenRouter API:"
-check "Anthropic API:"
-check "OpenAI API:"
+check "OpenRouter:"
+check "Anthropic:"
+check "OpenAI:"
 
 echo ""
 if $PASS; then

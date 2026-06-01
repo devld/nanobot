@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+
+display="${XPRA_DISPLAY:-:100}"
+start-xpra
+exec env DISPLAY="$display" playwright-cli --headed open "$@"

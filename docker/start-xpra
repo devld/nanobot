@@ -1,0 +1,38 @@
+#!/bin/sh
+set -eu
+
+display="${XPRA_DISPLAY:-:100}"
+display_number="${display#:}"
+port="${XPRA_PORT:-14500}"
+log_file="${XDG_RUNTIME_DIR:-/tmp}/xpra/${display_number}/server.log"
+
+xpra_is_live() {
+    xpra list 2>/dev/null | grep -Fq "LIVE session at ${display}"
+}
+
+if xpra_is_live; then
+    echo "xpra ${display} already running"
+else
+    xpra start "$display" \
+        --bind-tcp="0.0.0.0:${port}" \
+        --html=on \
+        --exit-with-children=no
+fi
+
+# `xpra start` returns as soon as the daemon has forked. Xvfb and the xpra
+# server need a little longer before clients can use the display.
+attempt=0
+while [ "$attempt" -lt 40 ]; do
+    if [ -S "/tmp/.X11-unix/X${display_number}" ] && xpra_is_live; then
+        exit 0
+    fi
+    attempt=$((attempt + 1))
+    sleep 0.25
+done
+
+echo "Error: xpra ${display} did not become ready" >&2
+if [ -f "$log_file" ]; then
+    echo "xpra server log (${log_file}):" >&2
+    cat "$log_file" >&2
+fi
+exit 1
